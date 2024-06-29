@@ -1,0 +1,20 @@
+html, body {
+  margin: 10;
+  padding: 0;
+  background: white;
+}
+canvas{
+  display: block;
+}
+
+
+.program {
+  font-family: Monospace;
+  color: black;
+  font-weight: 400;
+}
+.current-instruction {
+  font-family: Monospace;
+  color: red;
+  font-weight: 600;
+}
