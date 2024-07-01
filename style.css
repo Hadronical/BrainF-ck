@@ -3,10 +3,13 @@ html, body {
   padding: 0;
   background: white;
 }
-canvas{
+canvas {
   display: block;
 }
 
+#txt_script {
+  resize: none;
+}
 
 .program {
   font-family: Monospace;
