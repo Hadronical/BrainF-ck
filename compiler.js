@@ -18,74 +18,76 @@ let output_buffer = "";
 
 let skipping_loop = false;
 let loopStack = {
-  values: [],
-  get: (i) => { return loopStack.values[i] },
-  getTop: () => { return loopStack.values[loopStack.values.length - 1] },
-  push: (value) => {
-    loopStack.values.push(value);
-    drawStackPushArrow = 1;
-  },
-  pop: () => {
-    drawStackPopArrow = 1;
-    let value = loopStack.values.pop();
-    if (value != undefined) {
-      return value;
-    }
-  },
-  reset: () => {
-    loopStack.values = [];
-  }
+	values: [],
+	get: (i) => { return loopStack.values[i] },
+	getTop: () => { return loopStack.values[loopStack.values.length - 1] },
+	push: (value) => {
+		loopStack.values.push(value);
+		drawStackPushArrow = 1;
+	},
+	pop: () => {
+		drawStackPopArrow = 1;
+		let value = loopStack.values.pop();
+		if (value != undefined) {
+			return value;
+		}
+	},
+	reset: () => {
+		loopStack.values = [];
+	}
 };
 
 function* Compile (script, buffer_size) {
-  memory = Array(buffer_size).fill(0);
-  memory_pointer = 0;
-  output_buffer = "";
+	memory = Array(buffer_size).fill(0);
+	memory_pointer = 0;
+	output_buffer = "";
 
-  let skipping_loop = false;
-  loopStack.reset();
-  
-  program_loop: for (program_pointer = 0, program_end = script.length; program_pointer < program_end; program_pointer++) {    
-    let char = script[program_pointer];
-    visited[program_pointer]++;
+	let skipping_loop = false;
+	loopStack.reset();
 
-    if (char == '[') {
-      if (memory[memory_pointer] !== 0)
-        loopStack.push(program_pointer);
-      else
-        skipping_loop = true;
-    }
-    else if (char == ']') {
-      if (skipping_loop) {
-        skipping_loop = false;
-        continue program_loop;
-      }
+	program_loop: for (program_pointer = 0, program_end = script.length; program_pointer < program_end; program_pointer++) {
+		step_execution_time = performance.now();
 
-      if (memory[memory_pointer] !== 0)
-        program_pointer = loopStack.getTop();
-      else
-        loopStack.pop();
-    }
+		let char = script[program_pointer];
+		visited[program_pointer]++;
 
-    if (skipping_loop == false) {
-      switch (char) {
-        case "+": memory[memory_pointer]++; break;
-        case "-": memory[memory_pointer]--; break;
-        case ">": memory_pointer++; break;
-        case "<": memory_pointer--; break;
-        case ".": output_buffer += String.fromCharCode((memory[memory_pointer])); break;
-        case ",": memory[memory_pointer] = prompt()[0].charCodeAt(); break;
-        default: break;
-      }
+		if (char == '[') {
+			if (memory[memory_pointer] !== 0)
+				loopStack.push(program_pointer);
+			else
+				skipping_loop = true;
+		}
+		else if (char == ']') {
+			if (skipping_loop) {
+				skipping_loop = false;
+				continue program_loop;
+			}
 
-      if (memory_pointer < 0 || memory_pointer >= memory_size) {
-        console.error(`memory address ${memory_pointer} invalid!`);
-        break program_loop;
-      }
-    }
-    
-    yield;
-  }
+			if (memory[memory_pointer] !== 0)
+				program_pointer = loopStack.getTop();
+			else
+				loopStack.pop();
+		}
 
-  return output_buffer;
+		if (skipping_loop == false) {
+			switch (char) {
+				case "+": memory[memory_pointer]++; break;
+				case "-": memory[memory_pointer]--; break;
+				case ">": memory_pointer++; break;
+				case "<": memory_pointer--; break;
+				case ".": output_buffer += String.fromCharCode((memory[memory_pointer])); drawOutputBufferArrow = 1; break;
+				case ",": memory[memory_pointer] = prompt()[0].charCodeAt(); break;
+				default: break;
+			}
+
+			if (memory_pointer < 0 || memory_pointer >= memory_size) {
+				console.error(`memory address ${memory_pointer} invalid!`);
+				break program_loop;
+			}
+		}
+
+		yield;
+	}
+
+	return output_buffer;
 }

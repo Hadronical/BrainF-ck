@@ -11,6 +11,10 @@ canvas {
   resize: none;
 }
 
+#sld_interval {
+  width: 300px;
+}
+
 .program {
   font-family: Monospace;
   color: black;

@@ -1,8 +1,9 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/p5.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.9.0/addons/p5.sound.min.js"></script>
+    <script src="p5.min.js"></script>
+    <script src="p5.sound.min.js"></script>
+
     <link rel="stylesheet" type="text/css" href="style.css">
     <meta charset="utf-8" />
   </head>
@@ -10,7 +11,13 @@
   <body>
     <label for="txt_script">Script:</label><br>
     <textarea id="txt_script" name="txt_script" rows="5" cols="50"></textarea><br>
-    <button id="btn_run" onclick="run();">run</button>
+
+    <button id="btn_run" onclick="run();">run</button><br>
+
+    <label for="sld_interval">Execution Rate:</label><br>
+    <input type="range" id="sld_interval" name="sld_interval" min="-200" max="0" step="1" value="-60"></input>
+
+
     <script src="compiler.js"></script>
     <script src="sketch.js"></script>
   </body>

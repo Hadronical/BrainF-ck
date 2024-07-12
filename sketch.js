@@ -1,4 +1,5 @@
 let txt_script = document.getElementById("txt_script");
+let sld_interval = document.getElementById("sld_interval");
 
 
 let defaultScript = ">>>>>+++++[>+++++++++++[>++++++++++<-]<-[<+>-]<]>>>------.>---------.>--.>--.>+.";
@@ -7,10 +8,17 @@ let memory_size = 15;
 
 let visual_memorySize = 25;
 let visual_memorySize_2 = visual_memorySize/2;
+let visual_program_pointer_prev = program_pointer;
+let visual_tapePosition = 0;
 let margin_x = 10;
 
 let drawStackPushArrow = 0;
 let drawStackPopArrow = 0;
+let drawOutputBufferArrow = 0;
+
+let execution_timer;
+let execution_interval;
+let step_execution_time = 0;
 
 let program;
 let visited = [];
@@ -18,8 +26,19 @@ let visited = [];
 function run () {
 	script = txt_script.value;
 	program = Compile(script, memory_size);
-	setInterval(() => program.next(), 200);
 	visited = Array(script.length).fill(0);
+	setRunRate();
+}
+
+sld_interval.addEventListener("change", setRunRate);
+function setRunRate () {
+	if (execution_timer != undefined) {
+		clearInterval(execution_timer);
+	}
+
+	execution_interval = -sld_interval.value;
+
+	execution_timer = setInterval(() => program.next(), execution_interval);
 }
 
 function setup () {
@@ -31,6 +50,7 @@ function draw () {
 	background(255);
 
 
+	// program tape
 	push();
 	fill(0);
 	noStroke();
@@ -40,20 +60,31 @@ function draw () {
 
 	let y = 40;
 	let dx = 18;
+	if (execution_interval > 0) {
+		let time_elapsed = round(step_execution_time - performance.now());
+		visual_tapePosition = dx * lerp(visual_program_pointer_prev, program_pointer, time_elapsed / execution_interval);	
+	}
+	else {
+		visual_tapePosition = dx * program_pointer;
+	}
 	for (let i = 0; i < script.length; i++) {
-		text(script[i], margin_x + dx*i - dx*program_pointer, y);
+		text(script[i], margin_x + dx*i - visual_tapePosition, y);
 
 		push();
 		fill(40,200,40, 5*visited[i]);
-		rect(margin_x + dx*i - dx*program_pointer - dx/2, y-20, dx,-10);
+		rect(margin_x + dx*i - visual_tapePosition - dx/2, y-15, dx,-10);
 		pop();
 	}
 
 	textSize(10);
 	for (let i = 0; i < script.length; i++) {
-		text(i, margin_x + dx*i - dx*program_pointer, y+25);
+		text(i, margin_x + dx*i - visual_tapePosition, y+25);
 	}
 
+	visual_program_pointer_prev = program_pointer;
+
+
+	// program memory
 	stroke(0);
 	noFill();
 	rect(margin_x+dx/2,y-14, dx,47, 3);
@@ -74,6 +105,8 @@ function draw () {
 	text("^", margin_x + memory_pointer*visual_memorySize + visual_memorySize_2, y + visual_memorySize+visual_memorySize_2 + 5);
 	pop();
 
+
+	// program loop stack
 	push();
 	y = 200;
 	y_ = y + 8*20;
@@ -105,6 +138,8 @@ function draw () {
 	}
 
 
+
+	// program output
 	push();
 	y = y_;
 	text("output:", margin_x + 120, y-5);
@@ -112,12 +147,26 @@ function draw () {
 	rect(margin_x+120, y, 200, 20);
 	text(output_buffer, margin_x + 120 + 5, y+14);
 	pop();
+
+	if (drawOutputBufferArrow > 0) {
+		arrow_outputBuffer();
+		drawOutputBufferArrow -= 0.1;
+	}
 }
 
 
 
 
-
+function arrow_outputBuffer () {
+	Arrow(
+		[
+			margin_x + memory_pointer*visual_memorySize + visual_memorySize_2,125 + visual_memorySize,
+			margin_x + memory_pointer*visual_memorySize + visual_memorySize_2,135 + visual_memorySize+visual_memorySize_2,
+			margin_x + memory_size * visual_memorySize * 0.5,135 + visual_memorySize+visual_memorySize_2,
+			margin_x + memory_size * visual_memorySize * 0.5,350
+		], 2.5, 20
+	);
+}
 
 function arrow_stackpush () {
 	Arrow(
